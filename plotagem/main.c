@@ -40,28 +40,52 @@ Node *insertInList(Node *head, int num){
 }
 
 BinaryTree *insertInBT(BinaryTree *bt, int num){
-    if(bt == NULL) bt = createBinaryTree(num);
-    else if(num < bt->num) bt->left = insertInBT(bt->left, num);
-    else if(num > bt->num) bt->right = insertInBT(bt->right, num);
+    if(bt == NULL){
+        bt = createBinaryTree(num);
+    }else if(num < bt->num){
+        bt->left = insertInBT(bt->left, num);
+    }else if(num > bt->num){
+         bt->right = insertInBT(bt->right, num);
+    }
 
     return bt;
 }
+/*
+insertInBT(NULL, 2)
+    bt = createBuinaryTree(2)
 
+insertInBT(arvore binaria, 3) bt -> arvore binaria
+    insertInBT(NULL, 3) _> NONO NO
+
+insertInBT(arvore binaria, 9)
+     bt->right  = insertInBT(arvore binaria->DIREITO,9); ( ARVOR 9 )
+        insertInBT(NULL,9); -> ARVORE 9
+
+
+
+*/
 int searchInList(Node *node, int num){
     int cont = 0;
 
     while(node != NULL){
         cont++;
 
-        if(node->num == num) return cont;
+        if(node->num == num){
+            return cont;
+        }
 
         node = node->next;
     }
 
-    return cont + 1;
+    return cont+1; //CASO O NUMERO NAÕ ESTEJA NA LISTA
 }
+/* 3
+2 6 9 12 16
+          *    
+CONT = 6
+*/
 
-int searchInBST(BinaryTree *node, int num){
+int searchInBST(BinaryTree *node, int num){// 4
     int cont = 0;
 
     while(node != NULL){
@@ -137,6 +161,7 @@ int main() {
 
     for(int n = 50; n <= 50000; n += 50){
         int numbersInserted[n], biggest_possible_comparison_list = n + 1, biggest_possible_comparison_tree = 0;
+
         createValuesToInsert(n, &head, &root, numbersInserted);
 
         biggest_comparison_tree(root, &biggest_possible_comparison_tree, 1);
