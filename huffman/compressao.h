@@ -290,7 +290,7 @@ void inserir_dados_comprimidos(FILE* arquivo_comprimido,
 
             if(index_do_bit < 0){
                 fwrite(&byte_em_construcao,sizeof(unsigned char),1,arquivo_comprimido);
-                //printf("[1]\n");
+                printf("[1]\n");
                 index_do_bit = 7;
                 byte_em_construcao = 0;
             }
@@ -299,7 +299,7 @@ void inserir_dados_comprimidos(FILE* arquivo_comprimido,
     //se tem lixo <=> ainda terminou de percorrer pelos dados, mas ainda ainda não formou o byte completo =: insira-o
     if(index_do_bit != 7){
         fwrite(&byte_em_construcao,sizeof(unsigned char),1,arquivo_comprimido);
-        //printf("[1]\n");
+        printf("[1]\n");
     }
 
 };
