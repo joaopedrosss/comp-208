@@ -17,7 +17,7 @@ A fins didáticos, essa versão da Trie:
 Quantos caracteres vamos usar?
 Isso é definido por TAMANHO_ALFA (tamanho do alfabeto)
 */
-#define TAMANHO_ALFA 26
+#define TAMANHO_ALFABETO 26
 
 
 
@@ -27,7 +27,7 @@ Isso é definido por TAMANHO_ALFA (tamanho do alfabeto)
     tamanho do alfabeto adotado (ASCII)
 */
 typedef struct trie_node{
-    struct trie_node *children[TAMANHO_ALFA];
+    struct trie_node *children[TAMANHO_ALFABETO];
     bool fimDePalavra;
 }TRIE_NODE;
 
@@ -39,7 +39,7 @@ E retorna o esse novo no criado.
 TRIE_NODE* criar_trie_node(){
     TRIE_NODE* novo_no = (TRIE_NODE*) malloc(sizeof(TRIE_NODE));
 
-    for(int i = 0; i < TAMANHO_ALFA; i++){
+    for(int i = 0; i < TAMANHO_ALFABETO; i++){
         novo_no->children[i] = NULL;
     }
     novo_no->fimDePalavra = false;
@@ -50,7 +50,7 @@ TRIE_NODE* criar_trie_node(){
 
 /*
 Exemplo: palavra 'gato'
-
+          0 1 2 3
 'gato' -> g a t o \0
  char* palavra: aponta para o primeiro caractere (no caso: 'g')
 
@@ -64,7 +64,7 @@ Exemplo: palavra 'gato'
 
  index_char: qual o indice desse caractere no nosso array?
 
-Voltando para o ínicio da parlavra (*palavra é iguala 'a')
+Voltando para o ínicio da parlavra (*palavra é iguala 'g')
 
 int index_char =  *palavra - 'a'; é o mesmo que 'a' - 'a' ; 97 - 97 = 0
 palavra++
@@ -77,6 +77,11 @@ palavra++
 
 NÃO CHEGAREMOS AO PONTO DE '\0' - 'a', pois o loop para assim que *palavra é igual a '\0'
 */
+
+int index_de(char* letra_atual){
+    return *letra_atual - 'a';
+}
+
 void inserir_node(TRIE_NODE **raiz, char* palavra){
 
     // Trie vazia
@@ -86,17 +91,21 @@ void inserir_node(TRIE_NODE **raiz, char* palavra){
 
     TRIE_NODE *node_atual = *raiz;
 
-    while (*palavra != '\0')// gato = g a t o \0
-    {
-        int index_char =  *palavra - 'a';
+    char *letra_atual = palavra;
 
-        if(node_atual->children[index_char] == NULL){
-            node_atual->children[index_char] = criar_trie_node();
+    while (*letra_atual != '\0')// gato = g a t o \0 PERCORRE A NOSSA PALAVRA
+    {
+        //int index_char =  *palavra - 'a'; // 'a' - 'a' = 99 - 97 = 0
+        // [apontando][[NULL][[NULL][[NULL][[NULL][[NULL]
+        //   |
+        //[NULL][[NULL][[NULL][[NULL][[NULL]
+        if(node_atual->children[index_de(letra_atual)] == NULL){
+            node_atual->children[index_de(letra_atual)] = criar_trie_node();
         }
 
-        node_atual = node_atual->children[index_char];
-
-        palavra++; //andamos na palavra
+        node_atual = node_atual->children[index_de(letra_atual)]; // node_atual->children[1]
+        //node_atual = node_atual->children[o];
+        letra_atual++; //andamos na palavra 
     }
     node_atual->fimDePalavra = true;
 
@@ -127,21 +136,23 @@ bool buscar_node(TRIE_NODE *raiz, char* palavra){
     return node_atual->fimDePalavra;    
 }
 
-void auto_complete_rec(TRIE_NODE* node_atual,char *palavra_formada, int tamanho_palavra){
-    char texto[tamanho_palavra];
-    strcpy(texto,palavra_formada);
-    texto[tamanho_palavra] = '\0';
+//tamanho_palavra tamanho_prefixo
+//texto palavra_em_construcao
+void auto_complete_rec(TRIE_NODE* node_atual,char *palavra_formada, int tamanho_prefixo){
+    char palavra_em_construcao[tamanho_prefixo]; // texto[6] = petiz []
+    strcpy(palavra_em_construcao,palavra_formada);
+    palavra_em_construcao[tamanho_prefixo] = '\0';
 
     if(node_atual->fimDePalavra){
-        printf("%s\n", texto);
+        printf("%s\n", palavra_em_construcao);
     }
 
-    for(int i = 0; i < TAMANHO_ALFA; i++){
+    for(int i = 0; i < TAMANHO_ALFABETO; i++){
         if(node_atual->children[i] != NULL){
-            texto[tamanho_palavra - 1] = i + 'a';
+            palavra_em_construcao[tamanho_prefixo - 1] = i + 'a'; // 0 + 97 -> 'a' ;  5 + 97 -> 'o'
             char k = i + 97;
-            //printf("%c\n",k);
-            auto_complete_rec(node_atual->children[i],texto,tamanho_palavra + 1);
+            //printf("%c\n",k);//tamanho_palavra volta a ser 5
+            auto_complete_rec(node_atual->children[i],palavra_em_construcao,tamanho_prefixo + 1);
         }
     }
 
@@ -161,7 +172,7 @@ void auto_complete(TRIE_NODE *raiz, char *prefixo_procurado){
     
     int tamanho_prefixo = strlen(prefixo);
 
-    while (*prefixo)// gato = g a t o \0
+    while (*prefixo != '\0')// p e t i z
     {
         int index_char =  *prefixo - 'a';
 
@@ -177,13 +188,13 @@ void auto_complete(TRIE_NODE *raiz, char *prefixo_procurado){
 
     //printf("%d %s\n",node_atual->fimDePalavra,prefixo_procurado);
 
-    auto_complete_rec(node_atual, prefixo_procurado, tamanho_prefixo + 1);
+    auto_complete_rec(node_atual, prefixo_procurado, tamanho_prefixo + 1); //pretiz
 }
 
 bool node_has_children(TRIE_NODE *node){
     if (node == NULL) return false;
 
-    for(int i = 0; i < TAMANHO_ALFA; i++){
+    for(int i = 0; i < TAMANHO_ALFABETO; i++){
         if (node->children[i] != NULL) return true;
     }
 
@@ -248,11 +259,13 @@ int main(){
     inserir_node(&my_trie, "petizada");
     inserir_node(&my_trie, "petizote");
 
+    /*
     printf("Tem? %d\n",buscar_node(my_trie,"petiza"));
     printf("Tem? %d\n",buscar_node(my_trie,"petizote"));
     printf("Tem? %d\n",buscar_node(my_trie,"petiz"));
     printf("Tem? %d\n",buscar_node(my_trie,"petizada"));
-    auto_complete(my_trie,"p");
+    */
+    auto_complete(my_trie,"petiz");
 
     printf("Removi? %d\n",remove_node(&my_trie,"petiz"));
     printf("Tem? %d\n",buscar_node(my_trie,"petiz"));
