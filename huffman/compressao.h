@@ -216,12 +216,12 @@ void inserir_arvore_no_arquivo(COMPRESS_TREE* arvore_huff,
             if(byte == '*' || byte == '\\'){
                 uint8_t caractere_de_escape = '\\';
 
-                printf("\\");
+                //printf("\\");//PRINT PARA DEBUG
 
                 fwrite(&caractere_de_escape, sizeof(uint8_t),1,arquivo_comprimido);
             }
         }
-        printf("-%d-\n",byte);
+        //printf("-%d-\n",byte); //PRINT PARA DEBUG
 
         fwrite(&byte,sizeof(uint8_t),1,arquivo_comprimido);
 
@@ -259,7 +259,7 @@ void inserir_header_no_arquivo(COMPRESS_TREE* arvore_huff,
     //(uint8_t) (0001 0000 0000)
     //0x0000 0000 (segundo_byte) (decimal: 0)
 
-    printf("%d %d\n",primeiro_byte,segundo_byte);
+    //printf("%d %d\n",primeiro_byte,segundo_byte); //PRINT PARA DEBUG
 
     fwrite(&primeiro_byte,sizeof(uint8_t),1,arquivo_comprimido);
 
@@ -290,7 +290,7 @@ void inserir_dados_comprimidos(FILE* arquivo_comprimido,
 
             if(index_do_bit < 0){
                 fwrite(&byte_em_construcao,sizeof(unsigned char),1,arquivo_comprimido);
-                printf("[1]\n");
+                //printf("[1]\n"); PRINT PARA DEBUG
                 index_do_bit = 7;
                 byte_em_construcao = 0;
             }
@@ -299,7 +299,7 @@ void inserir_dados_comprimidos(FILE* arquivo_comprimido,
     //se tem lixo <=> ainda terminou de percorrer pelos dados, mas ainda ainda não formou o byte completo =: insira-o
     if(index_do_bit != 7){
         fwrite(&byte_em_construcao,sizeof(unsigned char),1,arquivo_comprimido);
-        printf("[1]\n");
+        //printf("[1]\n"); PRINT PARA DEBUG
     }
 
 };
@@ -337,8 +337,8 @@ void calcular_lixo(long *tamanho_de_lixo,
         bits_COM_compac += frequencia_do_byte[i] * strlen(dicionario[i]);
     } 
     *tamanho_de_lixo = (bits_sem_compac - bits_COM_compac) % 8;
-    printf("Tamanho antes: %ld bits\nTamanho depois: %ld bits\n", bits_sem_compac,bits_COM_compac);
-    printf("Diff %ld bits\nLixo %d bit\n",bits_sem_compac - bits_COM_compac, *tamanho_de_lixo);
+    printf("\nTamanho antes: %ld bits\nTamanho depois: %ld bits\n", bits_sem_compac,bits_COM_compac);
+    printf("Diff de: %ld bits\nLixo %d bit\n",bits_sem_compac - bits_COM_compac, *tamanho_de_lixo);
 }
 
 
@@ -369,7 +369,30 @@ COMPRESS_TREE* criar_fila_de_prioridade(){
     return NULL;
 }
 
+void free_dicionario(uint8_t** dicionario){
+    int i;
+    for(i = 0; i < 256; i++){
+        free(dicionario[i]);
+    }   
+    free(dicionario);
+    return;
+}
+
+void free_huffman_tree_comp(COMPRESS_TREE* arvore){
+    while (arvore != NULL)
+    {
+        free_huffman_tree_comp(arvore->esquerda);
+        free_huffman_tree_comp(arvore->direita);
+        free(arvore->byte);
+        free(arvore);
+        return;
+    }
+    
+}
+
 void comprimir_arquivo(char *nome_do_arquivo){
+    printf("\n-------------------------------------");
+    printf("\nINICIANDO COMPRESSAO\n");
 
     COMPRESS_TREE* fila_de_prioridade = criar_fila_de_prioridade();
 
@@ -397,10 +420,10 @@ void comprimir_arquivo(char *nome_do_arquivo){
 
     long int tamanho_do_arquivo = ftell(arquivo);
 
-    printf("tamanho do arquivo: %ld bytes\n",tamanho_do_arquivo);
+    printf("\ntamanho do arquivo: %ld bytes\n",tamanho_do_arquivo);
 
     fseek(arquivo,0,SEEK_SET);
-    printf("%d\n",ftell(arquivo));
+    //printf("%d\n",ftell(arquivo)); //PRINT PARA DEBUG
     
     /**
     * 2) Pegar a frequencia dos bytes do arquivo
@@ -429,7 +452,7 @@ void comprimir_arquivo(char *nome_do_arquivo){
     fclose(arquivo);
 
 
-    printf("ANALISANDO A FREQUENCIA DOS BYTES...\n");
+    printf("\nANALISANDO A FREQUENCIA DOS BYTES...\n");
 
     while(count_byte < tamanho_do_arquivo){
         //uint8_t
@@ -477,19 +500,19 @@ void comprimir_arquivo(char *nome_do_arquivo){
 
         fila_de_prioridade = fila_de_prioridade->next;
     }*/
-    imprimir_fila(fila_de_prioridade);
+    //imprimir_fila(fila_de_prioridade); PRINT PARA DEBUG
 
     /*
     3) MONTAR ARVORE DE HUFFMAN
     */
 
-   printf("MONTANDO A ARVORE DE HUFFMAN...\n");
+   printf("\nMONTANDO A ARVORE DE HUFFMAN...\n");
 
    COMPRESS_TREE *arvore_huffman = NULL;
 
    criar_arvore_de_huffman(&arvore_huffman,&fila_de_prioridade);
 
-   imprimir_em_pre_ordem(arvore_huffman);
+   //imprimir_em_pre_ordem(arvore_huffman); //PRINT PARA DEBUG
 
     /*
     4) MONTAR DICIONARIO COM NOVA CODIFICACAO
@@ -500,9 +523,9 @@ void comprimir_arquivo(char *nome_do_arquivo){
 
    altura_da_arvore = calcular_altura(arvore_huffman);
    
-   printf("MONTANDO DICIONARIO COM NOVA CODIFICACAO....\n");
+   printf("\nMONTANDO DICIONARIO COM NOVA CODIFICACAO....\n");
 
-   printf("altura %ld\n",altura_da_arvore);
+   //printf("altura %ld\n",altura_da_arvore); PRINT PARA DEBUG
 
    long tamanho_max = altura_da_arvore + fim_de_string;
    
@@ -522,9 +545,9 @@ void comprimir_arquivo(char *nome_do_arquivo){
    for(int i = 0; i < MAX_TABLE_SIZE; i++){
     if(dicionario[i][0] != '\0'){
         if(i == 42 || i == 92){
-            printf("\\");
+            //printf("\\"); PRINT PARA DEBUG
         }
-        printf("%c %s\n",i,dicionario[i]);
+        //printf("%c %s\n",i,dicionario[i]); PRINT PARA DEBUG
     }
    }
 
@@ -538,19 +561,32 @@ void comprimir_arquivo(char *nome_do_arquivo){
 
    tamanho_do_lixo = tamanho_do_lixo % 8;
 
-   printf("%ld bit\n",tamanho_do_lixo);
+   //printf("%ld bit\n",tamanho_do_lixo); PRINT PARA DEBUG
 
    qtd_elementos_arvore = tamanho_da_arvore(arvore_huffman);
-
-   printf("tamanho da arvore (+ caractres de escape): %ld\n",qtd_elementos_arvore);   
+   
+   //PRINT PARA DEBUG
+   //printf("tamanho da arvore (+ caractres de escape): %ld\n",qtd_elementos_arvore);   
 
 
    /*
     6) ESCREVER ARQUIVO COMPRIMIDO
     */
-   printf("INSERINDO DADOS EM ARQUIVO COMPRIMIDO...\n");
+   printf("\nINSERINDO DADOS EM ARQUIVO COMPRIMIDO...\n");
 
-   arquivo_comprimido = fopen("teste.txt.huff", "wb");
+   //DEFININDO NOVO NOME DO ARQUIVO...
+   int lenght_nome = strlen(nome_do_arquivo);
+   char nome_comprimido[lenght_nome];
+   char extension[] = ".huff";
+
+   strcpy(nome_comprimido,nome_do_arquivo);
+   for(int i = 0; i < 5;i++ ){
+    nome_comprimido[lenght_nome+i] = extension[i];
+   }
+   nome_comprimido[strlen(nome_comprimido)-1] = '\0';
+   //printf("NOVO NOME: %s\n",nome_comprimido); 
+
+   arquivo_comprimido = fopen(nome_comprimido, "wb");
 
    if (arquivo_comprimido == NULL)
    {
@@ -564,4 +600,12 @@ void comprimir_arquivo(char *nome_do_arquivo){
 
     //inserir_header_no_arquivo(arvore_huffman,5,256,arquivo_comprimido);
    fclose(arquivo_comprimido);
+
+   printf("\nARQUIVO COMPRIMIDO PRONTO!\n");
+
+   free_dicionario(dicionario);
+   free_huffman_tree_comp(arvore_huffman);
+
+   dicionario = NULL;
+   arvore_huffman = NULL;
 }

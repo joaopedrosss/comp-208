@@ -200,7 +200,17 @@ void inserir_dados_descomprimidos(FILE* arquivo_descomprimido,
     return;
 };
 
-
+void free_huffman_tree(DECOMPRESS_TREE* arvore_unzip){
+    while (arvore_unzip != NULL)
+    {
+        free_huffman_tree(arvore_unzip->esquerda);
+        free_huffman_tree(arvore_unzip->direita);
+        free(arvore_unzip->byte);
+        free(arvore_unzip);
+        return;
+    }
+    
+}
 
 void descomprimir_arquivo(char* nome_do_arquivo, char* nome_destino){
     
