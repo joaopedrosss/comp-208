@@ -9,15 +9,22 @@ int main(){
     printf("Selecione o que deseja fazer:\n");
     */
     //char nome_do_arquivo[] = "japan.png";
-    //char nome_do_arquivo[] = "test.txt";
 
-    //comprimir_arquivo(nome_do_arquivo);
+    int escolha;
+    printf("Press 1 or 2: ");
+    scanf("%d",&escolha);
+
+    char nome_do_arquivo[] = "test.txt";
+
 
     char nome_do_arquivo_para_descomprimir[] = "teste.txt.huff";
-    char nome_final[] = "teste3.txt";
+    char nome_final[] = "teste_descomprido.txt";
 
-    descomprimir_arquivo(nome_do_arquivo_para_descomprimir,nome_final);
-
+    if(escolha == 1){
+        comprimir_arquivo(nome_do_arquivo);
+    }else{
+        descomprimir_arquivo(nome_do_arquivo_para_descomprimir,nome_final);
+    }
 
     
 }

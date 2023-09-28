@@ -304,6 +304,8 @@ void inserir_dados_comprimidos(FILE* arquivo_comprimido,
 
 };
 
+
+
 long tamanho_da_arvore(COMPRESS_TREE *arvore){
     int por_caractere_de_escape = 0; // diz a folha eh um caractere * ou //
 
@@ -321,6 +323,7 @@ long tamanho_da_arvore(COMPRESS_TREE *arvore){
     return 1 + por_caractere_de_escape + tamanho_da_arvore(arvore->esquerda) + tamanho_da_arvore(arvore->direita);
 
 }
+
 
 void calcular_lixo(long *tamanho_de_lixo,
                    uint8_t** dicionario,
@@ -354,7 +357,7 @@ void imprimir_em_pre_ordem(COMPRESS_TREE* arvore_huffman){
         if(*((uint8_t*)arvore_huffman->byte) == '*' && arvore_huffman->esquerda != NULL && arvore_huffman->direita != NULL){
             printf("* ");
         }else{
-            printf("%d ",*((uint8_t*)arvore_huffman->byte));
+            printf("%c ",*((uint8_t*)arvore_huffman->byte));
         }
         printf("%ld\n",arvore_huffman->frequencia_do_byte);
         imprimir_em_pre_ordem(arvore_huffman->esquerda);
@@ -521,7 +524,7 @@ void comprimir_arquivo(char *nome_do_arquivo){
         if(i == 42 || i == 92){
             printf("\\");
         }
-        printf("%d %s\n",i,dicionario[i]);
+        printf("%c %s\n",i,dicionario[i]);
     }
    }
 
