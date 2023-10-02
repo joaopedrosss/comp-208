@@ -2,6 +2,23 @@
 #include "descompressao.h"
 
 int main(){
+    /*
+    comprimir_arquivo("teste1.txt");
+    descomprimir_arquivo("teste1.txt.huff","descomp1.txt");
+    */
+
+    /* TESTE 2
+    comprimir_arquivo("teste2.png");
+    descomprimir_arquivo("teste2.png.huff","descomp2.png");
+    */
+
+    /* TESTE 3
+    comprimir_arquivo("teste3.jpg");
+    descomprimir_arquivo("teste3.jpg.huff","descomp3.jpg");
+    */          
+
+
+    
     
     printf("--------------------------------------\n");
     printf("COMPRESSOR/DESCOMPRESSOR DE ARQUIVOS\n");
@@ -15,7 +32,7 @@ int main(){
 
     while(rodando){
         printf("--------------------------------------\n");
-        printf("Selecione o que deseja fazer:\n");
+        printf("Digite o NUMERO da opcao desejada:\n");
         printf("(1) Comprimir\n(2) Descomprimir\n(3) SAIR\n");
         printf("--------------------------------------\n");
         printf("R>:");
@@ -34,7 +51,7 @@ int main(){
             case 2:
                 printf("Digite o nome do arquivo:\n");
                 scanf("%s",nome_do_arquivo);
-                printf("Digite o nome que terá o arquivo descomprimido:\n");
+                printf("Digite o nome que vai ter o arquivo descomprimido:\n");
                 scanf("%s",nome_descompressao);
                 descomprimir_arquivo(nome_do_arquivo,nome_descompressao);
                 break;
@@ -42,10 +59,12 @@ int main(){
                 rodando = 0;
                 break;
             default:
-                printf("Selecione uma opção válida!\n");
+                printf("Selecione uma opcao valida!\n");
+                break;
 
         }
     }
+    
 
     
 

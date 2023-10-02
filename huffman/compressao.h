@@ -187,7 +187,7 @@ void preencher_dicionario(uint8_t **dicionario,
 
         uint8_t byte = *((uint8_t*)raiz->byte);
 
-        for(uint8_t i = 0; i < profundidade; i++){
+        for(int i = 0; i < profundidade; i++){
             dicionario[byte][i] = aux_dic[i];
         }
         dicionario[byte][profundidade] = '\0';
@@ -325,20 +325,24 @@ long tamanho_da_arvore(COMPRESS_TREE *arvore){
 }
 
 
-void calcular_lixo(long *tamanho_de_lixo,
-                   uint8_t** dicionario,
-                   long* frequencia_do_byte)
+int calcular_lixo(uint8_t** dicionario,
+                  long* frequencia_do_byte)
 {
     long bits_sem_compac = 0;
     long bits_COM_compac = 0;
 
     for(int i = 0; i < MAX_TABLE_SIZE; i++){
-        bits_sem_compac += frequencia_do_byte[i] * 8; //1 byte
-        bits_COM_compac += frequencia_do_byte[i] * strlen(dicionario[i]);
+        if(frequencia_do_byte[i] != 0){
+            bits_sem_compac += frequencia_do_byte[i] * 8; //1 byte
+            bits_COM_compac += frequencia_do_byte[i] * strlen(dicionario[i]);
+        }
     } 
-    *tamanho_de_lixo = (bits_sem_compac - bits_COM_compac) % 8;
+    int tamanho_de_lixo = (bits_sem_compac - bits_COM_compac) % 8;
+
     printf("\nTamanho antes: %ld bits\nTamanho depois: %ld bits\n", bits_sem_compac,bits_COM_compac);
-    printf("Diff de: %ld bits\nLixo %d bit\n",bits_sem_compac - bits_COM_compac, *tamanho_de_lixo);
+    printf("Diff de: %ld bits\nLixo %d bit\n",bits_sem_compac - bits_COM_compac, tamanho_de_lixo);
+
+    return tamanho_de_lixo;
 }
 
 
@@ -391,10 +395,10 @@ void free_huffman_tree_comp(COMPRESS_TREE* arvore){
 }
 
 void comprimir_arquivo(char *nome_do_arquivo){
-    printf("\n-------------------------------------");
+    printf("\n--------------------------------------\n");
     printf("\nINICIANDO COMPRESSAO\n");
 
-    COMPRESS_TREE* fila_de_prioridade = criar_fila_de_prioridade();
+    COMPRESS_TREE* fila_de_prioridade = NULL;
 
     FILE *arquivo = fopen(nome_do_arquivo,"rb");
 
@@ -405,12 +409,6 @@ void comprimir_arquivo(char *nome_do_arquivo){
         exit(1);
     }
 
-    /*
-    uint8_t numb = 9;
-    printf("%d\n",sizeof(uint8_t));
-    printf("%ld\n",(long)numb);
-    printf("%d\n",sizeof(numb));
-    */
     
     /**
     * 1) Pegando o tamanho do aqruivo
@@ -418,7 +416,7 @@ void comprimir_arquivo(char *nome_do_arquivo){
     */
     fseek(arquivo,0,SEEK_END); //*stream, offset, origin
 
-    long int tamanho_do_arquivo = ftell(arquivo);
+    long tamanho_do_arquivo = ftell(arquivo);
 
     printf("\ntamanho do arquivo: %ld bytes\n",tamanho_do_arquivo);
 
@@ -444,26 +442,28 @@ void comprimir_arquivo(char *nome_do_arquivo){
 
     //inicializando os array em  0
     memset(bytes_do_arquivo,0,tamanho_do_arquivo); //*ptr, value, num 
-    memset(frequencia_do_byte,0,MAX_TABLE_SIZE*sizeof(long)); //*ptr, value, num 
-
+    
     //pega os bytes do arquivo
     fread(bytes_do_arquivo,1, tamanho_do_arquivo, arquivo);
 
     fclose(arquivo);
+
+    memset(frequencia_do_byte,0,MAX_TABLE_SIZE*sizeof(long)); //*ptr, value, num 
+
+
 
 
     printf("\nANALISANDO A FREQUENCIA DOS BYTES...\n");
 
     while(count_byte < tamanho_do_arquivo){
         //uint8_t
-        frequencia_do_byte[(long) bytes_do_arquivo[ind]] += 1;
+        frequencia_do_byte[bytes_do_arquivo[count_byte]] += 1;
         //printf("%d\n", sizeof(bytes_do_arquivo[ind]));
         //printf("%d %ld -\n",bytes_do_arquivo[ind],frequencia_do_byte[(long) bytes_do_arquivo[ind]]);
         count_byte++;
-        ind++; 
     }
     count_byte = 0;
-    ind = 0;
+
 
     for(long i = 0; i < MAX_TABLE_SIZE; i++){
         
@@ -484,7 +484,7 @@ void comprimir_arquivo(char *nome_do_arquivo){
             //PQ? SE A FUCNAO RECBESSE *novo_node, Passado POR VALOR: na funcao recebria a copia de um ponteiro, e não o ponteiro em si
             ///PARA PASSAR POR REFERENCIA - PRECISO DO ENDERECO DE 1 PONTEIRO, QUE É GUARDADAO NUM PONTEIRO DUPLO
             
-            alocar_novo_no_em(&novo_node,&ind,frequencia_do_byte[i]);
+            alocar_novo_no_em(&novo_node,&i,frequencia_do_byte[i]);
 
             //printf("%d %ld\n",*((uint8_t*)novo_node->byte),novo_node->frequencia_do_byte);
 
@@ -519,9 +519,11 @@ void comprimir_arquivo(char *nome_do_arquivo){
     */
    long altura_da_arvore;
    long fim_de_string = 1;
+   long qtd_elementos_arvore;
    
 
    altura_da_arvore = calcular_altura(arvore_huffman);
+   qtd_elementos_arvore = tamanho_da_arvore(arvore_huffman);
    
    printf("\nMONTANDO DICIONARIO COM NOVA CODIFICACAO....\n");
 
@@ -555,15 +557,17 @@ void comprimir_arquivo(char *nome_do_arquivo){
     5) CALCULAR LIXO e TAMAMANHO DA ARVORE
     */
 
-   long tamanho_do_lixo, qtd_elementos_arvore;
+   
+   int  tamanho_do_lixo;
 
-   calcular_lixo(&tamanho_do_lixo,dicionario,frequencia_do_byte);
+   
+   tamanho_do_lixo = calcular_lixo(dicionario,frequencia_do_byte);
 
-   tamanho_do_lixo = tamanho_do_lixo % 8;
+   //tamanho_do_lixo = tamanho_do_lixo % 8;
 
    //printf("%ld bit\n",tamanho_do_lixo); PRINT PARA DEBUG
 
-   qtd_elementos_arvore = tamanho_da_arvore(arvore_huffman);
+   
    
    //PRINT PARA DEBUG
    //printf("tamanho da arvore (+ caractres de escape): %ld\n",qtd_elementos_arvore);   
@@ -580,10 +584,10 @@ void comprimir_arquivo(char *nome_do_arquivo){
    char extension[] = ".huff";
 
    strcpy(nome_comprimido,nome_do_arquivo);
-   for(int i = 0; i < 5;i++ ){
+   for(int i = 0; i < 5;i++){
     nome_comprimido[lenght_nome+i] = extension[i];
    }
-   nome_comprimido[strlen(nome_comprimido)-1] = '\0';
+   nome_comprimido[strlen(nome_comprimido)] = '\0';
    //printf("NOVO NOME: %s\n",nome_comprimido); 
 
    arquivo_comprimido = fopen(nome_comprimido, "wb");

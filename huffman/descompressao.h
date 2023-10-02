@@ -44,9 +44,10 @@ DECOMPRESS_TREE *montar_arvore(uint8_t *bytes_do_arquivo,
     }else{
         if(bytes_do_arquivo[*posicao_atual] == '\\'){ //veja se eh um caractere especial
 
-            printf("[%d]\n",*posicao_atual);
+            //printf("[%d]\n",*posicao_atual);
             (*posicao_atual)++; //vá para o proximo byte
-            printf("[%d] %c\n",*posicao_atual,bytes_do_arquivo[*posicao_atual]);
+            //printf("[%d] %c\n",*posicao_atual,bytes_do_arquivo[*posicao_atual]);
+            //PRINT PARA DEBUG 
             raiz = novo_node_arvore(&bytes_do_arquivo[*posicao_atual]);
             (*posicao_atual)++;
 
@@ -57,8 +58,8 @@ DECOMPRESS_TREE *montar_arvore(uint8_t *bytes_do_arquivo,
             
             
             raiz = novo_node_arvore(&bytes_do_arquivo[*posicao_atual]);
-            printf("[%d] %c\n",*posicao_atual,bytes_do_arquivo[*posicao_atual]);
-            
+            //printf("[%d] %c\n",*posicao_atual,bytes_do_arquivo[*posicao_atual]);
+            //PRINT PARA DEBUG            
 
             (*posicao_atual)++;
 
@@ -70,8 +71,8 @@ DECOMPRESS_TREE *montar_arvore(uint8_t *bytes_do_arquivo,
 
         }else{ //chegou numa folha
             raiz = novo_node_arvore(&bytes_do_arquivo[*posicao_atual]);
-            printf("[%d] %c\n",*posicao_atual,bytes_do_arquivo[*posicao_atual]);
-
+            //printf("[%d] %c\n",*posicao_atual,bytes_do_arquivo[*posicao_atual]);
+            //PRINT PARA DEBUG 
             (*posicao_atual)++;
            
             return raiz;
@@ -188,7 +189,7 @@ void inserir_dados_descomprimidos(FILE* arquivo_descomprimido,
 
             if(arv_aux->direita == NULL && arv_aux->esquerda == NULL){ //vc chegou a uma folha
                 byte_da_arv = (uint8_t*)arv_aux->byte;
-                printf("-[%c]-\n",*byte_da_arv);
+                //printf("-[%c]-\n",*byte_da_arv); //PRINT PARA DEBUG
                 fwrite(&(*byte_da_arv), sizeof(uint8_t), 1, arquivo_descomprimido);
                 
                 arv_aux = arvore_huffman;
@@ -213,6 +214,9 @@ void free_huffman_tree(DECOMPRESS_TREE* arvore_unzip){
 }
 
 void descomprimir_arquivo(char* nome_do_arquivo, char* nome_destino){
+
+    printf("\n--------------------------------------\n");
+    printf("\nINICIANDO DESCOMPRESSAO\n");
     
     FILE *arquivo_comprimido = fopen(nome_do_arquivo,"rb");
 
@@ -256,11 +260,11 @@ void descomprimir_arquivo(char* nome_do_arquivo, char* nome_destino){
 
    tamanho_lixo_e_huffman(&bits_de_lixo, &tamanho_da_arvore,bytes_do_arquivo);
 
-   printf("Tamanho De Lixo: %d\n Tamanho Da Arvore (com caracteres ed escape): %ld\n",bits_de_lixo,tamanho_da_arvore);
+   printf("\nTamanho De Lixo: %d\nTamanho Da Arvore (incluso caracteres de escape): %ld\n",bits_de_lixo,tamanho_da_arvore);
 
    DECOMPRESS_TREE*  arvore_unzip = NULL;
 
-   printf("MONTANDO ARVORE DE HUFFMAN...\n");
+   printf("\nMONTANDO ARVORE DE HUFFMAN...\n");
 
     /*
     3) MONTAR ÁRVORE DE HUFFMAN
@@ -268,11 +272,11 @@ void descomprimir_arquivo(char* nome_do_arquivo, char* nome_destino){
    // TODO: COLOCAR POSICAO ATUAL COMO TIPO 'long' ver se tem alguma diferença
    int posicao_atual = 2; // já estamos lendo o 3.o byte (byte na posicao 2) -> ver uma abordagem sem o mais dois
    arvore_unzip = montar_arvore(bytes_do_arquivo,&posicao_atual,tamanho_da_arvore,arvore_unzip);  // por que tamanho da arvore + 2
-   printf("posicao atual:%d\n",posicao_atual);
+   //printf("posicao atual:%d\n",posicao_atual); //PRINT PARA DEBUG
    //POR QUE tamanho_da_arvore+2 ?
    //nos adiantamos dois bytes: estamos no terceiro byte
    
-   imprimir_em_pre_ordem_descompress(arvore_unzip);
+   //imprimir_em_pre_ordem_descompress(arvore_unzip); // PRINT PARA DEBUG
 
    FILE* arquivo_descomprimido = fopen(nome_destino, "wb");
 
@@ -285,6 +289,8 @@ void descomprimir_arquivo(char* nome_do_arquivo, char* nome_destino){
     4) ESCREVER O ARQUIVO DESCOMPRIMIDO :)
     */
    int lixo = bits_de_lixo;
+
+   printf("\nESCREVENDO ARQUIVO DESCOMPRIMIDO...\n");
 
    inserir_dados_descomprimidos(arquivo_descomprimido, bytes_do_arquivo, tamanho_do_arquivo,posicao_atual, lixo, arvore_unzip);
 
@@ -301,6 +307,8 @@ void descomprimir_arquivo(char* nome_do_arquivo, char* nome_destino){
   arvore_unzip = NULL;
   
   fclose(arquivo_descomprimido);
+
+  printf("\nARQUIVO PRONTO!\n");
 
 
 }
