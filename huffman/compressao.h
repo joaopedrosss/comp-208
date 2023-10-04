@@ -580,10 +580,11 @@ void comprimir_arquivo(char *nome_do_arquivo){
 
    //DEFININDO NOVO NOME DO ARQUIVO...
    int lenght_nome = strlen(nome_do_arquivo);
-   char nome_comprimido[lenght_nome];
+   char nome_comprimido[106];
    char extension[] = ".huff";
 
    strcpy(nome_comprimido,nome_do_arquivo);
+   
    for(int i = 0; i < 5;i++){
     nome_comprimido[lenght_nome+i] = extension[i];
    }

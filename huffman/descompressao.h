@@ -4,7 +4,7 @@
 typedef struct binary_tree_decompress{
     void *byte;
     struct binary_tree_decompress *esquerda,*direita;
-}DECOMPRESS_TREE;
+}DECOMPRESS_TREE; //arvore binaria
 
 DECOMPRESS_TREE *novo_node_arvore(void *byte){
     DECOMPRESS_TREE *novo_node = (DECOMPRESS_TREE*) malloc(sizeof(DECOMPRESS_TREE));

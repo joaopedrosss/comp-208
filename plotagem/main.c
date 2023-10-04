@@ -99,18 +99,6 @@ int searchInBST(BinaryTree *node, int num){// 4
     return cont +1;
 }
 
-void createValuesToInsert(int n, Node **head, BinaryTree **root, int numbersInserted[]){
-    int random;
-
-    for(int i = 0; i < n; i++){
-        random = rand();
-        *root = insertInBT(*root,random);
-        *head = insertInList(*head, random);
-
-        numbersInserted[i] = random;
-    }
-}
-
 void printTree(BinaryTree *node){
     if(node == NULL) return;
     printf("%d\n", node->num);
@@ -138,48 +126,70 @@ void freeTree(BinaryTree *node){
     free(node);
 }
 
-void biggest_comparison_tree(BinaryTree *node, int *i, int comparisons){
-    if(node == NULL){
-        if(comparisons > *i) *i = comparisons;
-        return;
-    }
-
-    biggest_comparison_tree(node->left, i, comparisons + 1);
-    biggest_comparison_tree(node->right, i, comparisons + 1);
-}
 
 int main() {
     int indice_random;
     BinaryTree *root = NULL;
     Node *head = NULL;
-    FILE *dados, *biggest_comparisons;
+    FILE *dados;
 
-    srand(time(NULL));
+    //srand(time(NULL));
 
-    dados = fopen("dados.txt", "w");
-    biggest_comparisons = fopen("biggest_comparisons.txt", "w");
+    
+    int range_max = 50000;
+    int numeros_inseridos[range_max];
 
-    for(int n = 50; n <= 50000; n += 50){
-        int numbersInserted[n], biggest_possible_comparison_list = n + 1, biggest_possible_comparison_tree = 0;
+    for(int n = 1; n <= range_max; n++){
+        
+        int random = rand() % n; //pegar números aleatórios de 0 a n aleatórios para colocar na arvore e lista
+        
+        root = insertInBT(root,random);
+        head = insertInList(head,random);
+        numeros_inseridos[n] = random;
 
-        createValuesToInsert(n, &head, &root, numbersInserted);
+        /*
+        como n começa com números pequenos, maior é a as chances de virem números pequenos no inicio
+        pois menor a é a margem 
+            números aleatórios de 0 a 1
+            números aleatórios de  0 a 2
+            números aleatórios de 0 a 3
+            ...
+            números aleatórios de 0 a 10000
+            ---
+            números aleatórios de 0 a 50000
+        esses números pequenos no ínício portanto, são aidicionando no aind ano íncio
+        fazendo com que eles fiquem no final da lista encadeada 
+        */
+        
+    }
+    
+    /*
+    printTree(root);
+    printf("----\n");
+    printList(head);
+    */
 
-        biggest_comparison_tree(root, &biggest_possible_comparison_tree, 1);
+   dados = fopen("dados.txt", "w");
+    
+    for(int n = 1; n <= range_max; n++){
+        int random_indice = rand() % range_max;//pegar números aleatórios de 1 a n aleatórios para colocar na arvore e lista
+        int comp_bst = searchInBST(root,numeros_inseridos[random_indice]);
+        int comp_list = searchInList(head,numeros_inseridos[random_indice]);
 
-        indice_random = rand() % n;
-        fprintf(dados, "%d %d %d\n", n, searchInList(head, numbersInserted[indice_random]), searchInBST(root, numbersInserted[indice_random]));
-        fprintf(biggest_comparisons, "%d %d %d\n", n, biggest_possible_comparison_list, biggest_possible_comparison_tree);
+        //printf("[%d] [%d] [%d]\n",numeros_inseridos[random_indice],comp_list, comp_bst);
 
-        freeTree(root);
-        root = NULL;
-        freeList(head);
-        head = NULL;
+        fprintf(dados,"%d %d %d\n",numeros_inseridos[random_indice],comp_list,comp_bst);
     }
 
+
     fclose(dados);
-    fclose(biggest_comparisons);
 
     printf("Finalizado!\n");
+
+    freeTree(root);
+    root = NULL;
+    freeList(head);
+    head = NULL;
 
     return 0;
 }
