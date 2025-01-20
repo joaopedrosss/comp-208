@@ -9,17 +9,17 @@
 
 # Como usar
 
-No diretório do projeto (\comp-208\), vá para a pasta \/huffman\ e execute o comando abaixo:  
+No diretório do projeto (`comp-208`), vá para a pasta `/huffman` e execute o comando abaixo:  
 
-a.exe  
+`a.exe`  
 
 Em caso de erro,ainda no mesmo diretório, insira na linha de comando:  
 
-\gcc init_huff.c\  
+`gcc init_huff.c`  
 
-\a.exe\  
+`a.exe` 
 
-Vale ressaltar que é necessário ter o gcc propriamente instalado em seu computador.
+Vale ressaltar que é necessário ter o [GCC](https://gcc.gnu.org/) propriamente instalado em seu computador.
 
 # Feito por
 
