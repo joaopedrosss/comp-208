@@ -1,5 +1,5 @@
 
-  ![Instituto da Computação - logo](https://uxwing.com/wp-content/themes/uxwing/download/file-and-folder-type/zip-icon.png)
+  ![Instituto da Computação - logo](/zip(1).png)
   
  # Compactador e Descompactador de Arquivos - Homemade Zip
   
