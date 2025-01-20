@@ -1,5 +1,5 @@
 
-  ![Instituto da Computação - logo](/zip.png)
+  ![Homemade zip - logo](/zip3.png)
   
  # Compactador e Descompactador de Arquivos - Homemade Zip
   
